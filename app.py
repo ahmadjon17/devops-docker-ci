@@ -1,16 +1,19 @@
+
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
+
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         response = {
             "app": "devops-lab",
             "version": os.getenv("APP_VERSION", "1.0"),
-            "status": "running"
+            "status": "running",
         }
 
-        body = json.dumps(response).encode()
+        body = json.dumps(response).encode("utf-8")
 
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -18,4 +21,18 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-HTTPServer(("0.0.0.0", 8000), Handler).serve_forever()
+
+def create_server(host="0.0.0.0", port=8000):
+    return HTTPServer((host, port), Handler)
+
+
+if __name__ == "__main__":
+    server = create_server()
+    print("Server running on port 8000")
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
